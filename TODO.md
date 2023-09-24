@@ -61,7 +61,7 @@ This is what I learned during the development of the idompet project
 
 ## Asyncronous
 - [ ] Implement background worker in Go with Redis and async
-- Integrate async workers to Go web server
+- [ ] Integrate async workers to Go web server
 - [ ] Send async task to Redis within in a database transaction
 - [ ] How to handle error and print logs for Go async workers
 - [ ] A bit of delay might be good for your async tasks
