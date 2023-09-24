@@ -14,10 +14,11 @@ SELECT * FROM akun
 LIMIT $1
 OFFSET $2;
 
--- name: UpdateAkun :exec
+-- name: UpdateAkun :one
 UPDATE akun
 SET saldo = $2
-WHERE id = $1;
+WHERE id = $1
+RETURNING *;;
 
 -- name: DeleteAkun :exec
 DELETE FROM akun

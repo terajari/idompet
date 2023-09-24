@@ -100,10 +100,11 @@ func (q *Queries) ListAkun(ctx context.Context, arg ListAkunParams) ([]Akun, err
 	return items, nil
 }
 
-const updateAkun = `-- name: UpdateAkun :exec
+const updateAkun = `-- name: UpdateAkun :one
 UPDATE akun
 SET saldo = $2
 WHERE id = $1
+RETURNING id, nama, saldo, dibuat_pada
 `
 
 type UpdateAkunParams struct {
@@ -111,7 +112,14 @@ type UpdateAkunParams struct {
 	Saldo int64 `json:"saldo"`
 }
 
-func (q *Queries) UpdateAkun(ctx context.Context, arg UpdateAkunParams) error {
-	_, err := q.db.ExecContext(ctx, updateAkun, arg.ID, arg.Saldo)
-	return err
+func (q *Queries) UpdateAkun(ctx context.Context, arg UpdateAkunParams) (Akun, error) {
+	row := q.db.QueryRowContext(ctx, updateAkun, arg.ID, arg.Saldo)
+	var i Akun
+	err := row.Scan(
+		&i.ID,
+		&i.Nama,
+		&i.Saldo,
+		&i.DibuatPada,
+	)
+	return i, err
 }
