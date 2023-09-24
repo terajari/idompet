@@ -14,7 +14,7 @@ const (
 	Source = "postgresql://postgres:1234@localhost:5432/idompet?sslmode=disable"
 )
 
-var testQueries *Queries
+var testQueries *Store
 
 func TestMain(m *testing.M) {
 	conn, err := sql.Open(Driver, Source)
@@ -22,6 +22,6 @@ func TestMain(m *testing.M) {
 		log.Fatal("Tidak dapat terhubung ke database", err)
 	}
 
-	testQueries = New(conn)
+	testQueries = NewStore(conn)
 	os.Exit(m.Run())
 }
