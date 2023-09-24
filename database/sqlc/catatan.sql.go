@@ -34,6 +34,23 @@ func (q *Queries) CreateCatatan(ctx context.Context, arg CreateCatatanParams) (C
 	return i, err
 }
 
+const getCatatan = `-- name: GetCatatan :one
+SELECT id, id_akun, jumlah, dibuat_pada FROM catatan
+WHERE id = $1
+`
+
+func (q *Queries) GetCatatan(ctx context.Context, id int64) (Catatan, error) {
+	row := q.db.QueryRowContext(ctx, getCatatan, id)
+	var i Catatan
+	err := row.Scan(
+		&i.ID,
+		&i.IDAkun,
+		&i.Jumlah,
+		&i.DibuatPada,
+	)
+	return i, err
+}
+
 const listCatatan = `-- name: ListCatatan :many
 SELECT id, id_akun, jumlah, dibuat_pada FROM catatan
 WHERE id_akun = $1
