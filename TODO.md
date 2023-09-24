@@ -4,7 +4,7 @@ This is what I learned during the development of the idompet project
 ## Working with database
 - [x] Design schema database
 - [x] Install docker and image Postgresql
-- [ ] Write Database migration
+- [x] Write Database migration
 - [ ] Generate CRUD code from sqlc
 - [ ] Write golang unit test with random data
 - [ ] Database transaction implementation
