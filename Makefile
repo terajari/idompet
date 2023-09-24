@@ -24,4 +24,7 @@ migrateup:
 migratedown:
 	migrate -path database/migration -database "${SOURCE}" -verbose down
 
-.PHONY: createcountainer startcountainer stopcountainer createdb dropdb newmigrate migrateup migratedown
+sqlc:
+	sqlc generate
+
+.PHONY: createcountainer startcountainer stopcountainer createdb dropdb newmigrate migrateup migratedown sqlc
