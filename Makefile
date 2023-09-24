@@ -1,12 +1,12 @@
 SOURCE=postgresql://postgres:1234@localhost:5432/idompet?sslmode=disable
 
-createcountainer:
+createcontainer:
 	docker run --name idompet -p 5432:5432 -e POSTGRES_PASSWORD=1234 -d postgres 
 
-startcountainer:
+startcontainer:
 	docker start idompet
 
-stopcountainer:
+stopcontainer:
 	docker stop idompet
 
 createdb:
