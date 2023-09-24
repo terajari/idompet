@@ -6,7 +6,7 @@ This is what I learned during the development of the idompet project
 - [x] Install docker and image Postgresql
 - [x] Write Database migration
 - [x] Generate CRUD code from sqlc
-- [ ] Write golang unit test with random data
+- [x] Write golang unit test with random data
 - [ ] Database transaction implementation
 - [ ] Handle deadlock
 - [ ] Set up Github action for automated test
