@@ -27,4 +27,7 @@ migratedown:
 sqlc:
 	sqlc generate
 
-.PHONY: createcountainer startcountainer stopcountainer createdb dropdb newmigrate migrateup migratedown sqlc
+test:
+	go test -v -cover ./...  
+
+.PHONY: createcountainer startcountainer stopcountainer createdb dropdb newmigrate migrateup migratedown sqlc test
