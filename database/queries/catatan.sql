@@ -10,3 +10,7 @@ SELECT * FROM catatan
 WHERE id_akun = $1
 LIMIT $1
 OFFSET $2;
+
+-- name: GetCatatan :one
+SELECT * FROM catatan
+WHERE id = $1;
