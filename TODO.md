@@ -8,7 +8,7 @@ This is what I learned during the development of the idompet project
 - [x] Generate CRUD code from sqlc
 - [x] Write golang unit test with random data
 - [x] Database transaction implementation
-- [ ] Handle deadlock
+- [x] Handle deadlock
 - [ ] Set up Github action for automated test
 
 ## Building Restful API
