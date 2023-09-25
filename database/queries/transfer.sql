@@ -6,5 +6,5 @@ VALUES
 RETURNING *;
 
 -- name: GetTransfer :one
-SELECT * FROM catatan
-WHERE id = $1;
+SELECT * FROM transfer
+WHERE id = $1 LIMIT 1;

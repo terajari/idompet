@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -11,13 +12,14 @@ func TestPerformTransfer(t *testing.T) {
 	pengirim := createRandomAkun(t)
 	penerima := createRandomAkun(t)
 
+	fmt.Println("before:", pengirim.Saldo, penerima.Saldo)
 	errs := make(chan error)
 	results := make(chan TransferTxResult)
 
-	n := 5
-	jumlah := int64(10)
+	n := int64(3)
+	jumlah := int64(500)
 
-	for i := 0; i < n; i++ {
+	for i := 0; int64(i) < n; i++ {
 		go func() {
 			result, err := testQueries.PerformTransfer(context.Background(), TransferTxParams{
 				IDPengirim: pengirim.ID,
@@ -30,7 +32,9 @@ func TestPerformTransfer(t *testing.T) {
 		}()
 	}
 
-	for i := 0; i < n; i++ {
+	existed := make(map[int]bool)
+	// check result
+	for i := 0; int64(i) < n; i++ {
 		err := <-errs
 		require.NoError(t, err)
 
@@ -70,5 +74,39 @@ func TestPerformTransfer(t *testing.T) {
 
 		_, err = testQueries.GetCatatan(context.Background(), catatanPenerima.ID)
 		require.NoError(t, err)
+
+		// check akun
+		akunPengirim := result.Pengirim
+		require.NotEmpty(t, akunPengirim)
+		require.Equal(t, pengirim.ID, akunPengirim.ID)
+
+		akunPenerima := result.Penerima
+		require.NotEmpty(t, akunPenerima)
+		require.Equal(t, penerima.ID, akunPenerima.ID)
+
+		// check saldo
+		selisihSaldoPengirim := pengirim.Saldo - akunPengirim.Saldo
+		selisihSaldoPenerima := akunPenerima.Saldo - penerima.Saldo
+		require.Equal(t, selisihSaldoPengirim, selisihSaldoPenerima)
+		require.True(t, selisihSaldoPengirim > 0)
+		require.True(t, selisihSaldoPengirim%jumlah == 0)
+
+		k := int(selisihSaldoPengirim / jumlah)
+		require.True(t, k >= 1 && k <= int(n))
+		require.NotContains(t, existed, k)
+		existed[k] = true
 	}
+
+	// check updated balance
+	updatedAkunPengirim, err := testQueries.GetAkun(context.Background(), pengirim.ID)
+	require.NoError(t, err)
+	require.NotEmpty(t, updatedAkunPengirim)
+
+	updatedAkunPenerima, err := testQueries.GetAkun(context.Background(), penerima.ID)
+	require.NoError(t, err)
+	require.NotEmpty(t, updatedAkunPenerima)
+
+	fmt.Println("after:", updatedAkunPengirim.Saldo, updatedAkunPenerima.Saldo)
+	require.Equal(t, pengirim.Saldo-n*jumlah, updatedAkunPengirim.Saldo)
+	require.Equal(t, penerima.Saldo+n*jumlah, updatedAkunPenerima.Saldo)
 }

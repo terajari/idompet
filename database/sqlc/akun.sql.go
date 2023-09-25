@@ -9,6 +9,30 @@ import (
 	"context"
 )
 
+const changeSaldo = `-- name: ChangeSaldo :one
+UPDATE akun
+SET saldo = saldo + $2
+WHERE id = $1
+RETURNING id, nama, saldo, dibuat_pada
+`
+
+type ChangeSaldoParams struct {
+	ID     int64 `json:"id"`
+	Jumlah int64 `json:"jumlah"`
+}
+
+func (q *Queries) ChangeSaldo(ctx context.Context, arg ChangeSaldoParams) (Akun, error) {
+	row := q.db.QueryRowContext(ctx, changeSaldo, arg.ID, arg.Jumlah)
+	var i Akun
+	err := row.Scan(
+		&i.ID,
+		&i.Nama,
+		&i.Saldo,
+		&i.DibuatPada,
+	)
+	return i, err
+}
+
 const createAkun = `-- name: CreateAkun :one
 INSERT INTO akun
 (nama, saldo)
@@ -51,6 +75,24 @@ WHERE id = $1
 
 func (q *Queries) GetAkun(ctx context.Context, id int64) (Akun, error) {
 	row := q.db.QueryRowContext(ctx, getAkun, id)
+	var i Akun
+	err := row.Scan(
+		&i.ID,
+		&i.Nama,
+		&i.Saldo,
+		&i.DibuatPada,
+	)
+	return i, err
+}
+
+const getAkunForUpdate = `-- name: GetAkunForUpdate :one
+SELECT id, nama, saldo, dibuat_pada FROM akun
+WHERE id = $1
+FOR NO KEY UPDATE
+`
+
+func (q *Queries) GetAkunForUpdate(ctx context.Context, id int64) (Akun, error) {
+	row := q.db.QueryRowContext(ctx, getAkunForUpdate, id)
 	var i Akun
 	err := row.Scan(
 		&i.ID,

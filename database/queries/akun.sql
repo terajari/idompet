@@ -9,6 +9,11 @@ RETURNING *;
 SELECT * FROM akun
 WHERE id = $1;
 
+-- name: GetAkunForUpdate :one
+SELECT * FROM akun
+WHERE id = $1
+FOR NO KEY UPDATE;
+
 -- name: ListAkun :many
 SELECT * FROM akun
 LIMIT $1
@@ -18,7 +23,13 @@ OFFSET $2;
 UPDATE akun
 SET saldo = $2
 WHERE id = $1
-RETURNING *;;
+RETURNING *;
+
+-- name: ChangeSaldo :one
+UPDATE akun
+SET saldo = saldo + sqlc.arg(jumlah)
+WHERE id = $1
+RETURNING *;
 
 -- name: DeleteAkun :exec
 DELETE FROM akun

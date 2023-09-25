@@ -37,16 +37,17 @@ func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) 
 }
 
 const getTransfer = `-- name: GetTransfer :one
-SELECT id, id_akun, jumlah, dibuat_pada FROM catatan
-WHERE id = $1
+SELECT id, pengirim, penerima, jumlah, dibuat_pada FROM transfer
+WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetTransfer(ctx context.Context, id int64) (Catatan, error) {
+func (q *Queries) GetTransfer(ctx context.Context, id int64) (Transfer, error) {
 	row := q.db.QueryRowContext(ctx, getTransfer, id)
-	var i Catatan
+	var i Transfer
 	err := row.Scan(
 		&i.ID,
-		&i.IDAkun,
+		&i.Pengirim,
+		&i.Penerima,
 		&i.Jumlah,
 		&i.DibuatPada,
 	)

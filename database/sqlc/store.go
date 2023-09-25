@@ -71,7 +71,23 @@ func (store *Store) PerformTransfer(ctx context.Context, arg TransferTxParams) (
 		return nil, err
 	}
 
-	// TODO: Update saldo akun
+	// GetAkun ->UpdateAkun
+
+	result.Pengirim, err = qtx.ChangeSaldo(ctx, ChangeSaldoParams{
+		ID:     arg.IDPengirim,
+		Jumlah: -arg.Jumlah,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	result.Penerima, err = qtx.ChangeSaldo(ctx, ChangeSaldoParams{
+		ID:     arg.IDPenerima,
+		Jumlah: arg.Jumlah,
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	return &result, tx.Commit()
 }
