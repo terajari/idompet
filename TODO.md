@@ -9,6 +9,7 @@ This is what I learned during the development of the idompet project
 - [x] Write golang unit test with random data
 - [x] Database transaction implementation
 - [x] Handle deadlock
+- [x] Avoid database deadlock
 - [ ] Set up Github action for automated test
 
 ## Building Restful API
