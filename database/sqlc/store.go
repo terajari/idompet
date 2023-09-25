@@ -72,22 +72,40 @@ func (store *Store) PerformTransfer(ctx context.Context, arg TransferTxParams) (
 	}
 
 	// GetAkun ->UpdateAkun
-
-	result.Pengirim, err = qtx.ChangeSaldo(ctx, ChangeSaldoParams{
-		ID:     arg.IDPengirim,
-		Jumlah: -arg.Jumlah,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	result.Penerima, err = qtx.ChangeSaldo(ctx, ChangeSaldoParams{
-		ID:     arg.IDPenerima,
-		Jumlah: arg.Jumlah,
-	})
-	if err != nil {
-		return nil, err
+	if arg.IDPengirim < arg.IDPenerima {
+		result.Pengirim, result.Penerima, err = AddMoney(ctx, store, arg.IDPengirim, -arg.Jumlah, arg.IDPenerima, arg.Jumlah)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		result.Penerima, result.Pengirim, err = AddMoney(ctx, store, arg.IDPenerima, arg.Jumlah, arg.IDPengirim, -arg.Jumlah)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &result, tx.Commit()
+}
+
+func AddMoney(
+	ctx context.Context,
+	store *Store,
+	acc1,
+	jumlah1,
+	acc2,
+	jumlah2 int64,
+) (account1 Akun, account2 Akun, err error) {
+	account1, err = store.ChangeSaldo(ctx, ChangeSaldoParams{
+		ID:     acc1,
+		Jumlah: jumlah1,
+	})
+	if err != nil {
+		return
+	}
+
+	account2, err = store.ChangeSaldo(ctx, ChangeSaldoParams{
+		ID:     acc2,
+		Jumlah: jumlah2,
+	})
+	return
 }

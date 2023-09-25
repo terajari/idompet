@@ -110,3 +110,53 @@ func TestPerformTransfer(t *testing.T) {
 	require.Equal(t, pengirim.Saldo-n*jumlah, updatedAkunPengirim.Saldo)
 	require.Equal(t, penerima.Saldo+n*jumlah, updatedAkunPenerima.Saldo)
 }
+
+func TestPerformTransferDeadlock(t *testing.T) {
+	pengirim := createRandomAkun(t)
+	penerima := createRandomAkun(t)
+
+	fmt.Println("before:", pengirim.Saldo, penerima.Saldo)
+	errs := make(chan error)
+
+	n := int64(10)
+	jumlah := int64(500)
+
+	for i := 0; int64(i) < n; i++ {
+		pengirimID := pengirim.ID
+		penerimaID := penerima.ID
+
+		if i%2 == 1 {
+			pengirimID = penerima.ID
+			penerimaID = pengirim.ID
+		}
+
+		go func() {
+			_, err := testQueries.PerformTransfer(context.Background(), TransferTxParams{
+				IDPengirim: pengirimID,
+				IDPenerima: penerimaID,
+				Jumlah:     jumlah,
+			})
+
+			errs <- err
+		}()
+	}
+
+	// check result
+	for i := 0; int64(i) < n; i++ {
+		err := <-errs
+		require.NoError(t, err)
+	}
+
+	// check updated balance
+	updatedAkunPengirim, err := testQueries.GetAkun(context.Background(), pengirim.ID)
+	require.NoError(t, err)
+	require.NotEmpty(t, updatedAkunPengirim)
+
+	updatedAkunPenerima, err := testQueries.GetAkun(context.Background(), penerima.ID)
+	require.NoError(t, err)
+	require.NotEmpty(t, updatedAkunPenerima)
+
+	fmt.Println("after:", updatedAkunPengirim.Saldo, updatedAkunPenerima.Saldo)
+	require.Equal(t, pengirim.Saldo, updatedAkunPengirim.Saldo)
+	require.Equal(t, penerima.Saldo, updatedAkunPenerima.Saldo)
+}
