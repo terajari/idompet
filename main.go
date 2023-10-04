@@ -7,20 +7,24 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/terajari/idompet/api"
 	database "github.com/terajari/idompet/database/sqlc"
-)
-
-const (
-	Driver = "postgres"
-	Source = "postgresql://postgres:1234@localhost:5432/idompet?sslmode=disable"
+	"github.com/terajari/idompet/util"
 )
 
 func main() {
-	conn, err := sql.Open(Driver, Source)
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("Cannot load .env")
+	}
+
+	conn, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Fatal(err)
 	}
 	store := database.NewStore(conn)
 	server := api.NewServer(store)
 
-	server.Router.Run()
+	err = server.Start(config.Address)
+	if err != nil {
+		log.Fatal("cannot load server")
+	}
 }

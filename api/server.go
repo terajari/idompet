@@ -24,8 +24,8 @@ func NewServer(db *database.Store) *Server {
 	return server
 }
 
-func (server *Server) Start() {
-	server.Router.Run()
+func (server *Server) Start(address string) error {
+	return server.Router.Run(address)
 }
 
 func ErrResponse(err error) gin.H {

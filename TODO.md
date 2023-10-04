@@ -14,7 +14,7 @@ This is what I learned during the development of the idompet project
 
 ## Building Restful API
 - [x] Implement Restful using Gin
-- [ ] Make and load config using Viper
+- [x] Make and load config using Viper
 - [ ] Mock database for test API
 - [ ] Implement transfer money with custom parameter validation
 - [ ] Add user table 
