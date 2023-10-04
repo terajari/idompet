@@ -10,10 +10,10 @@ This is what I learned during the development of the idompet project
 - [x] Database transaction implementation
 - [x] Handle deadlock
 - [x] Avoid database deadlock
-- [ ] Set up Github action for automated test
+- [x] Set up Github action for automated test
 
 ## Building Restful API
-- [ ] Implement Restful using Gin
+- [x] Implement Restful using Gin
 - [ ] Make and load config using Viper
 - [ ] Mock database for test API
 - [ ] Implement transfer money with custom parameter validation
