@@ -22,8 +22,12 @@ func RandomName() string {
 }
 
 func RandomSaldo() int64 {
-	var min int64 = 10000
-	var max int64 = 10000000
+	min := int64(10000)
+	max := int64(1000000)
+	return RandomInt(min, max)
+}
+
+func RandomInt(min, max int64) int64 {
 
 	return min + (rand.Int63n(max - min + 1))
 }

@@ -20,7 +20,7 @@ func (server *Server) createAkun(ctx *gin.Context) {
 		return
 	}
 
-	akun, err := server.Store.CreateAkun(ctx, database.CreateAkunParams{
+	akun, err := server.SQLStore.CreateAkun(ctx, database.CreateAkunParams{
 		Nama:  req.Nama,
 		Saldo: req.Saldo,
 	})
@@ -42,7 +42,7 @@ func (server *Server) getAkun(ctx *gin.Context) {
 		return
 	}
 
-	akun, err := server.Store.GetAkun(ctx, req.Id)
+	akun, err := server.SQLStore.GetAkun(ctx, req.Id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, ErrResponse(err))
@@ -65,7 +65,7 @@ func (server *Server) listAkun(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, ErrResponse(err))
 		return
 	}
-	akun, err := server.Store.ListAkun(ctx, database.ListAkunParams{
+	akun, err := server.SQLStore.ListAkun(ctx, database.ListAkunParams{
 		Limit:  req.PageSize,
 		Offset: (req.PageId - 1) * req.PageSize,
 	})

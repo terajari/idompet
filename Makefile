@@ -30,4 +30,6 @@ sqlc:
 test:
 	go test -v -cover ./...  
 
-.PHONY: createcountainer startcountainer stopcountainer createdb dropdb newmigrate migrateup migratedown sqlc test
+mock:
+	mockgen -package mockdatabase -destination database/mock/store.go github.com/terajari/idompet/database/sqlc Store
+.PHONY: createcountainer startcountainer stopcountainer createdb dropdb newmigrate migrateup migratedown sqlc test mock

@@ -11,7 +11,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var testQueries *Store
+var testQueries Store
 
 func TestMain(m *testing.M) {
 	config, err := util.LoadConfig("../..")

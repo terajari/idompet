@@ -5,13 +5,18 @@ import (
 	"database/sql"
 )
 
-type Store struct {
+type Store interface {
+	Querier
+	PerformTransfer(ctx context.Context, arg TransferTxParams) (*TransferTxResult, error)
+}
+
+type SQLStore struct {
 	*Queries
 	db *sql.DB
 }
 
-func NewStore(sql *sql.DB) *Store {
-	return &Store{
+func NewStore(sql *sql.DB) Store {
+	return &SQLStore{
 		db:      sql,
 		Queries: New(sql),
 	}
@@ -35,7 +40,7 @@ type TransferTxResult struct {
 
 // Transfer saldo dari pengirim ke penerima
 // lalu mencatat mutasi
-func (store *Store) PerformTransfer(ctx context.Context, arg TransferTxParams) (*TransferTxResult, error) {
+func (store *SQLStore) PerformTransfer(ctx context.Context, arg TransferTxParams) (*TransferTxResult, error) {
 	var result TransferTxResult
 	tx, err := store.db.Begin()
 	if err != nil {
@@ -89,7 +94,7 @@ func (store *Store) PerformTransfer(ctx context.Context, arg TransferTxParams) (
 
 func AddMoney(
 	ctx context.Context,
-	store *Store,
+	store *SQLStore,
 	acc1,
 	jumlah1,
 	acc2,

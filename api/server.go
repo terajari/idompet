@@ -6,15 +6,15 @@ import (
 )
 
 type Server struct {
-	Store  *database.Store
-	Router *gin.Engine
+	SQLStore database.Store
+	Router   *gin.Engine
 }
 
-func NewServer(db *database.Store) *Server {
+func NewServer(db database.Store) *Server {
 	router := gin.Default()
 	server := &Server{
-		Store:  db,
-		Router: router,
+		SQLStore: db,
+		Router:   router,
 	}
 
 	server.Router.POST("/akun", server.createAkun)
