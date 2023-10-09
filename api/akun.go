@@ -38,7 +38,7 @@ type getAkunReq struct {
 func (server *Server) getAkun(ctx *gin.Context) {
 	var req getAkunReq
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrResponse(err))
+		ctx.JSON(http.StatusBadRequest, ErrResponse(err))
 		return
 	}
 

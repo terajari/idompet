@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -18,29 +19,92 @@ import (
 
 func TestGetAkunAPI(t *testing.T) {
 	akun := randomAkun()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
-	mockStore := mockdatabase.NewMockStore(ctrl)
+	testCase := []struct {
+		name          string
+		id            int64
+		buildStubs    func(store *mockdatabase.MockStore)
+		checkResponse func(t *testing.T, recorder httptest.ResponseRecorder)
+	}{
+		{
+			name: "OK",
+			id:   akun.ID,
+			buildStubs: func(store *mockdatabase.MockStore) {
+				store.EXPECT().
+					GetAkun(gomock.Any(), gomock.Eq(akun.ID)).
+					Times(1).
+					Return(akun, nil)
+			},
+			checkResponse: func(t *testing.T, recorder httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+				requireMatchBody(t, recorder.Body, akun)
+			},
+		},
+		// TODO: make new case
+		{
+			name: "Not Found",
+			id:   akun.ID,
+			buildStubs: func(store *mockdatabase.MockStore) {
+				store.EXPECT().
+					GetAkun(gomock.Any(), gomock.Eq(akun.ID)).
+					Times(1).
+					Return(database.Akun{}, sql.ErrNoRows)
+			},
+			checkResponse: func(t *testing.T, recorder httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusNotFound, recorder.Code)
+			},
+		},
+		{
+			name: "Internal Error",
+			id:   akun.ID,
+			buildStubs: func(store *mockdatabase.MockStore) {
+				store.EXPECT().
+					GetAkun(gomock.Any(), gomock.Eq(akun.ID)).
+					Times(1).
+					Return(database.Akun{}, sql.ErrConnDone)
+			},
+			checkResponse: func(t *testing.T, recorder httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, recorder.Code)
+			},
+		},
+		{
+			name: "Bad Request",
+			id:   0,
+			buildStubs: func(store *mockdatabase.MockStore) {
+				store.EXPECT().
+					GetAkun(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+	}
 
-	mockStore.EXPECT().
-		GetAkun(gomock.Any(), gomock.Eq(akun.ID)).
-		Times(1).
-		Return(akun, nil)
+	for i := range testCase {
+		tc := testCase[i]
 
-	server := NewServer(mockStore)
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-	recorder := httptest.NewRecorder()
+			mockStore := mockdatabase.NewMockStore(ctrl)
+			tc.buildStubs(mockStore)
 
-	url := fmt.Sprintf("/akun/%d", akun.ID)
+			server := NewServer(mockStore)
 
-	request, err := http.NewRequest(http.MethodGet, url, nil)
-	require.NoError(t, err)
+			recorder := httptest.NewRecorder()
 
-	server.Router.ServeHTTP(recorder, request)
+			url := fmt.Sprintf("/akun/%d", tc.id)
 
-	require.Equal(t, http.StatusOK, recorder.Code)
-	requireMatchBody(t, recorder.Body, akun)
+			request, err := http.NewRequest(http.MethodGet, url, nil)
+			require.NoError(t, err)
+
+			server.Router.ServeHTTP(recorder, request)
+			tc.checkResponse(t, *recorder)
+		})
+	}
+
 }
 
 func randomAkun() database.Akun {
